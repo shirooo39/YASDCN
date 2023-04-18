@@ -1,9 +1,17 @@
+import shlex
+import subprocess
 from sys import exit
 from IPython.display import HTML
 
 
 def print_html(content='', color='#FFFFFF'):
-    display(HTML(f'<p style="font-size: 18px; font-weight: bold; color: {color};">{content}</p>'))
+    HTML(f'<p style="font-size: 18px; font-weight: bold; color: {color};">{content}</p>')
+
+
+def exec(command=''):
+    with subprocess.Popen(shlex.split(command), shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True) as proc:
+        for line in proc.stdout:
+            print(line, end='')
 
 
 def download(url, output_path='/content'):
@@ -13,16 +21,17 @@ def download(url, output_path='/content'):
         if not '/api/download/models/' in url:
             exit(print_html('❌ Please copy the url from the download button on the top right corner', '#F44336'))
 
-        !wget -nc -P '{output_path}' --content-disposition -q --show-progress --progress=bar:force 2>&1 '{url}'
-    elif 'huggingface.co' in url:
-        if '/blob/' in url:
-            url = url.replace('/blob/', '/resolve/')
-
-        !wget -nc -P '{output_path}' -q --show-progress --progress=bar:force 2>&1 '{url}'
+        command = 'wget -nc -P "{output_path}" --content-disposition -q --show-progress --progress=bar:force 2>&1 "{url}"'
     elif 'drive.google.com' in url:
-        !gdown '{url}' -O '{output_path}/'
+        command = 'gdown "{url}" -O "{output_path}/"'
     else:
-        !wget -nc -P '{output_path}' -q --show-progress --progress=bar:force 2>&1 '{url}'
+        if 'huggingface.co' in url:
+            if '/blob/' in url:
+                url = url.replace('/blob/', '/resolve/')
+
+        command = 'wget -nc -P "{output_path}" -q --show-progress --progress=bar:force 2>&1 "{url}"'
+    
+    exec(command)
 
 
 main_dir = f'/content/stable-diffusion'
