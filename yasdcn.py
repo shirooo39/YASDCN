@@ -5,7 +5,7 @@ from IPython.display import HTML
 
 
 def print_html(content='', color='#FFFFFF'):
-    HTML(f'<p style="font-size: 18px; font-weight: bold; color: {color};">{content}</p>')
+    display(HTML(f'<p style="font-size: 18px; font-weight: bold; color: {color};">{content}</p>'))
 
 
 def exec(command=''):
